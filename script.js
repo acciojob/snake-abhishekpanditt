@@ -1,141 +1,148 @@
-const gameContainer = document.getElementById("gameContainer");
-const scoreElement = document.getElementById("score");
-
-const ROW_COUNT = 20;
-const COLUMN_COUNT = 20;
-
+let inputDir = { x: 0, y: 0 };
+const gameSound = new Audio('music1.mp3');
+const foodSound = new Audio('food.mp3');
+const moveSound = new Audio('move.mp3');
+const gameoverSound = new Audio('gameover.mp3');
+let speed = 6;
 let score = 0;
+let lastPaintTime = 0;
+let snakeArr = [{ x: 1, y: 1 }];
+food = { x: 6, y: 8 };
 
-// Initialize the grid
-for (let row = 0; row < ROW_COUNT; row++) {
-    for (let column = 0; column < COLUMN_COUNT; column++) {
-        const pixel = document.createElement("div");
-        pixel.classList.add("pixel");
-        pixel.id = `pixel${row * COLUMN_COUNT + column}`;
-        gameContainer.appendChild(pixel);
+// Game function : 
+function main(currtime) {
+    window.requestAnimationFrame(main);
+    if ((currtime - lastPaintTime) / 1000 < 1 / speed) {
+        return;
     }
+    lastPaintTime = currtime;
+    gameEngine();
 }
 
-// Create the snake body
-const snakeBody = [1, 0];
-snakeBody.forEach(index => {
-    const pixel = document.getElementById(`pixel${index}`);
-    pixel.classList.add("snakeBodyPixel");
-});
-
-// Create the food
-let foodIndex = generateRandomIndex();
-const foodPixel = document.getElementById(`pixel${foodIndex}`);
-foodPixel.classList.add("food");
-
-// Set up the game loop
-let direction = "right";
-let intervalId = setInterval(moveSnake, 100);
-
-function moveSnake() {
-    const headIndex = snakeBody[0];
-    let nextIndex;
-
-    if (direction === "right") {
-        if ((headIndex + 1) % COLUMN_COUNT === 0) {
-            // Snake has hit the right wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
+function isCollide(snake) {
+    // if snake eats himself
+    for (let i = 1; i < snakeArr.length; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+            return true;
         }
-        nextIndex = headIndex + 1;
-    } else if (direction === "left") {
-        if (headIndex % COLUMN_COUNT === 0) {
-            // Snake has hit the left wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex - 1;
-    } else if (direction === "up") {
-        if (headIndex < COLUMN_COUNT) {
-            // Snake has hit the top wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex - COLUMN_COUNT;
-    } else if (direction === "down") {
-        if (headIndex >= (ROW_COUNT - 1) * COLUMN_COUNT) {
-            // Snake has hit the bottom wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex
-//your code here
-const gameContainer = document.getElementById("gameContainer");
-const scoreElement = document.getElementById("score");
-
-const ROW_COUNT = 20;
-const COLUMN_COUNT = 20;
-
-let score = 0;
-
-// Initialize the grid
-for (let row = 0; row < ROW_COUNT; row++) {
-    for (let column = 0; column < COLUMN_COUNT; column++) {
-        const pixel = document.createElement("div");
-        pixel.classList.add("pixel");
-        pixel.id = `pixel${row * COLUMN_COUNT + column}`;
-        gameContainer.appendChild(pixel);
     }
+    if ((snake[0].x >= 30 || snake[0].x <= 0) || snake[0].y >= 30 || snake[0].y <= 0) {
+        return true;
+    }
+    return false;
 }
 
-// Create the snake body
-const snakeBody = [1, 0];
-snakeBody.forEach(index => {
-    const pixel = document.getElementById(`pixel${index}`);
-    pixel.classList.add("snakeBodyPixel");
-});
+function gameEngine() {
+    // part 1 : updating the snake array and food
 
-// Create the food
-let foodIndex = generateRandomIndex();
-const foodPixel = document.getElementById(`pixel${foodIndex}`);
-foodPixel.classList.add("food");
+    if (isCollide(snakeArr)) {
+        gameoverSound.play();
+        gameSound.pause();
+        inputDir = { x: 0, y: 0 };
+        alert("Game Over. Press any key to Start again!");
+        snakeArr = [{ x: 1, y: 1 }];
+        score = 0;
+        speed = 4;
+        scoreBox.innerHTML = "Score : " + score;
+    }
 
-// Set up the game loop
-let direction = "right";
-let intervalId = setInterval(moveSnake, 100);
+    // If snake eats food, increase the score and regenerate food
+    if (snakeArr[0].y === food.y && snakeArr[0].x === food.x) {
+        foodSound.play();
+        score += 1;
 
-function moveSnake() {
-    const headIndex = snakeBody[0];
-    let nextIndex;
+        let hs = 100;
+        for (let i = 5; i <= hs; i += 5) {
+            if (score >= i) {
+                speed += 2;
+            }
+        }
 
-    if (direction === "right") {
-        if ((headIndex + 1) % COLUMN_COUNT === 0) {
-            // Snake has hit the right wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
+        if (score > hiscoreval) {
+            hiscoreval = score;
+            localStorage.setItem("hiscore", JSON.stringify(hiscoreval));
+            hiscoreBox.innerHTML = "Max Score : " + hiscoreval;
         }
-        nextIndex = headIndex + 1;
-    } else if (direction === "left") {
-        if (headIndex % COLUMN_COUNT === 0) {
-            // Snake has hit the left wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex - 1;
-    } else if (direction === "up") {
-        if (headIndex < COLUMN_COUNT) {
-            // Snake has hit the top wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex - COLUMN_COUNT;
-    } else if (direction === "down") {
-        if (headIndex >= (ROW_COUNT - 1) * COLUMN_COUNT) {
-            // Snake has hit the bottom wall
-            clearInterval(intervalId);
-            alert(`Game Over! Your score is ${score}.`);
-            return;
-        }
-        nextIndex = headIndex
+
+        scoreBox.innerHTML = "Score :" + score;
+        snakeArr.unshift({ x: snakeArr[0].x + inputDir.x, y: snakeArr[0].y + inputDir.y });
+        let a = 1;
+        let b = 29;
+        food = { x: Math.round(a + (b - a) * Math.random()), y: Math.round(a + (b - a) * Math.random()) }
+    }
+
+    // Moving the snake
+    for (let i = snakeArr.length - 2; i >= 0; i--) {
+        snakeArr[i + 1] = { ...snakeArr[i] };  //dot for not getting reference problem, use it as new object.
+    }
+    snakeArr[0].x += inputDir.x;
+    snakeArr[0].y += inputDir.y;
+
+    // ******
+    // part 2 : display the snake and food
+
+    // display the snake
+    board.innerHTML = "";
+    snakeArr.forEach((element, index) => {
+        snakeElement = document.createElement('div');
+        snakeElement.style.gridRowStart = element.y;
+        snakeElement.style.gridColumnStart = element.x;
+        snakeElement.classList.add('head');
+        board.appendChild(snakeElement);
+    })
+
+    // display the food
+    foodElement = document.createElement('div');
+    foodElement.style.gridRowStart = food.y;
+    foodElement.style.gridColumnStart = food.x;
+    foodElement.classList.add('food');
+    board.appendChild(foodElement);
+}
+
+// ******
+// Main logic here
+
+let hiscore = localStorage.getItem("hiscore");
+if (hiscore === null) {
+    hiscoreval = 0;
+    localStorage.setItem("hiscore", JSON.stringify(hiscoreval))
+}
+else {
+    hiscoreval = JSON.parse(hiscore);
+    hiscoreBox.innerHTML = "Max Score : " + hiscore;
+}
+
+window.requestAnimationFrame(main);
+window.addEventListener('keydown', element => {
+    inputDir = { x: 0, y: 1 } // to start the game
+    gameSound.play();
+    moveSound.play();
+    switch (element.key) {
+        case "ArrowUp":
+            console.log("ArrowUp");
+            inputDir.x = 0;
+            inputDir.y = -1;
+            break;
+
+        case "ArrowDown":
+            console.log("ArrowDown");
+            inputDir.x = 0;
+            inputDir.y = 1;
+            break;
+
+        case "ArrowLeft":
+            console.log("ArrowLeft");
+            inputDir.x = -1;
+            inputDir.y = 0;
+            break;
+
+        case "ArrowRight":
+            console.log("ArrowRight");
+            inputDir.x = 1;
+            inputDir.y = 0;
+            break;
+
+        default:
+            break;
+    }
+})
